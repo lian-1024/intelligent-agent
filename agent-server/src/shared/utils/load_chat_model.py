@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from curses import pair_content
 from typing import Optional, override
 
 from langchain_core.language_models import BaseChatModel
@@ -40,22 +41,29 @@ class OpenAIStrategy(ModelProviderStrategy):
         )
 
 
-def load_chat_model(model_and_provider:str,separator:Optional[str]) -> BaseChatModel:
+def load_chat_model(model_and_provider:str,separator:Optional[str] = ":") -> BaseChatModel:
     """
     模型加载
     """
-    separator = separator or ":"
 
-    # 分割获取 模型名称一个 提供商  GPT-4o/openai
-    model, provider =  model_and_provider.split(separator,maxsplit=1)
+    # 分割获取 模型名称和提供商 格式: GPT-4o:openai
+    if not model_and_provider or not isinstance(model_and_provider, str):
+        raise ValueError("模型和提供商参数必须是非空字符串")
+        
+    try:
+        model, provider = model_and_provider.split(separator, maxsplit=1)
+        if not model or not provider:
+            raise ValueError("模型名称和提供商不能为空")
+    except ValueError:
+        raise ValueError(f"模型格式无效，应为'模型名称{separator}提供商'格式")
 
-    
     strategies = {
-        "zhipuai":ZhipuAIStrategy()
+        "zhipuai":ZhipuAIStrategy(),
+        "openai":OpenAIStrategy()
     }
 
     if provider not in strategies:
-        raise ValueError(f"Unsupported provider：{provider}")
+        raise ValueError(f"不支持的提供商: {provider}，当前支持的提供商有: {', '.join(strategies.keys())}")
 
     return strategies[provider].load_model(model)
     

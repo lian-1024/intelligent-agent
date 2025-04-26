@@ -6,7 +6,6 @@ from pytz import timezone
 from dotenv import load_dotenv
 import requests
 import os
-from src.core import LLMConfig
 
 load_dotenv()
 

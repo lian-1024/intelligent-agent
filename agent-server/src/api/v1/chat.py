@@ -3,7 +3,7 @@
 from pkgutil import resolve_name
 from fastapi import APIRouter
 from langchain_core.messages import HumanMessage
-from src.agents.supervisor_agent import supervisor_agent
+from src.graphs.supervisor.graph import graph
 from src.models import ChatBody
 from fastapi.responses import StreamingResponse
 from datetime import datetime
@@ -27,7 +27,7 @@ def chat_completions(
     返回:
     模型生成的响应
     """
-    return   supervisor_agent.invoke({
+    return   graph.invoke({
         "messages": [
             HumanMessage(chat_body.input)
         ],
@@ -38,7 +38,7 @@ def chat_completions(
             "thread_id": chat_body.session_id
           }
         }
-    )
+    )["messages"][-1]
 
 
 @router.post("/stream")
@@ -60,7 +60,7 @@ async def chat_stream_completions(chat_body:ChatBody):
         Generator - 生成SSE格式的数据流
         """
 
-        response =  supervisor_agent.astream({
+        response =  graph.astream({
             "messages": [HumanMessage(chat_body.input)]
             }, 
             config={"configurable": {"thread_id": chat_body.session_id}},

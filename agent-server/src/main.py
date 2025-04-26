@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from src.api import api_router
-from src.core.configuration import ServerConfig
+from src.shared.configuration import ServerConfig
 
 import uvicorn
 
