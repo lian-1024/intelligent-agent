@@ -21,6 +21,15 @@ researcher = create_react_agent(
             prompt=RESEARCHER_PROMPT
         )
 
+"""
+阻塞html解析 
+立即下子啊并执行脚本
+按照在文档中的执行顺序
+
+异步下载脚本，不阻塞html解析
+等到html解析完成后，DOM;
+"""
+
 
 coder = create_react_agent(
             model=model,
