@@ -4,7 +4,7 @@ from src.shared.configuration.server_config import ServerConfig
 
 __all__ = [
     "ModelConfig",
-    "ServerConfig"
+    "ServerConfig",
 ]
 
 

@@ -1,5 +1,5 @@
 "use client"
-import { ChangeEvent, FC, FormEvent, HTMLAttributes, useEffect, useState } from "react"
+import { ChangeEvent, FC, FormEvent, HTMLAttributes, useState } from "react"
 import { ChatHeaderBar, ChatInputBar, ChatList } from "@/components/chat"
 import { cn } from "@/lib/utils"
 import { useSessionsStore } from "@/stores/use-sessions-store"
@@ -17,8 +17,6 @@ const placeholders = [
 ]
 
 
-const BASE_URL = "http://localhost:8000/api/v1"
-
 
 const ChatWindow: FC<ChatWindowProps> = ({ className }) => {
     const { addMessage } = useSessionsStore()
@@ -30,15 +28,18 @@ const ChatWindow: FC<ChatWindowProps> = ({ className }) => {
 
     const [messages,setMessages] = useState<string[]>([])
 
-    const { fetchChatData } = useSse(BASE_URL + API_ENDPOINTS.CHAT.CHAT_STREAM, {
+    
+    const { fetchChatData } = useSse(process.env.NEXT_PUBLIC_SERVER_BASE_URL + API_ENDPOINTS.CHAT.CHAT_COMPLETIONS, {
         method:METHODS.POST,
         onMessage: (data) => {
+            console.log("data:",data);
+            
             setMessages((prev) => [...prev,data])
         },
         onClose:() =>{
             console.log("messages:",messages);
             console.log("连接已关闭");
-        }
+        },
     })
 
 

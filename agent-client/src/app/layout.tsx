@@ -46,6 +46,8 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: HTMLAttributes<HTMLElement>) {
+
+  
   return (
     <html lang="en"
       // 避免hydration警告

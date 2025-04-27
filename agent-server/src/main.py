@@ -6,7 +6,6 @@ from src.shared.configuration import ServerConfig
 
 import uvicorn
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 启动时的操作

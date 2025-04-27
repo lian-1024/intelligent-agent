@@ -17,7 +17,7 @@ export interface SseOptions<T> {
 export function useSse<T>(url: string, options: SseOptions<T>) {
   
     const optionsRef = useRef(options)
-
+    
     useEffect(() => {
         optionsRef.current = options
     },[options])
@@ -32,16 +32,20 @@ export function useSse<T>(url: string, options: SseOptions<T>) {
         openWhenHidden = false,
     } = optionsRef.current;
     const fetchChatData = async (input:string,sessionId:string) => {
+        
+       
         if(!input && !input.trim()) return 
         if(!sessionId) return 
 
+        
+
         const requestBody = {
             ...(body ? JSON.parse(body) : {}),
-            session_id: sessionId,
-            input: input,
+            session_id: sessionId || "1",
+            user_input: input,
+            stream:"True",
+            file_urls:""
         };
-
-
 
 
         await fetchEventSource(url, {
@@ -54,14 +58,17 @@ export function useSse<T>(url: string, options: SseOptions<T>) {
             body: JSON.stringify(requestBody),
             openWhenHidden,
             async onopen(response) {
-                if (response.ok && response.headers.get('content-type')?.includes('text/event-stream')) {
-                    console.log('SSE connection established');
-                    if (onOpen) await onOpen(response);
-                } else {
-                    throw new Error(`Invalid SSE response: ${response.status}`);
-                }
+                if (onOpen) await onOpen(response)
+                
+                // if (response.ok && response.headers.get('content-type')?.includes('text/event-stream')) {
+                //     console.log('SSE connection established');
+                //     if (onOpen) await onOpen(response);
+                // } else {
+                //     throw new Error(`Invalid SSE response: ${response.status}`);
+                // }
             },
             onmessage(ev) {
+                
                 onMessage(ev.data)
             },
             onclose() {
@@ -70,7 +77,10 @@ export function useSse<T>(url: string, options: SseOptions<T>) {
             },
             onerror(err) {
                 console.error('SSE error:', err);
-                return onError ? onError(err) : 1000; // 默认 1 秒重试
+                if (onError) onError(err);
+                // 添加更详细的错误处理
+             
+                throw err; // 抛出错误直接关闭连接
             },
         });
     }

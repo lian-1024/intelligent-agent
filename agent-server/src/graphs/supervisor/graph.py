@@ -6,10 +6,13 @@ from src.graphs.supervisor.prompt import RESEARCHER_PROMPT,CODER_PROMPT,RAG_EXPE
 from src.shared.utils.tools import bocha_websearch_tool,get_time
 from src.graphs.supervisor.prompt import SUPERVISOR_SYSTEM_PROMPT
 import aiosqlite
+
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 
-model = load_chat_model(ModelConfig.OPENAI)
+config = ModelConfig()
+model =  load_chat_model(config.model)
+print("model:config:",config.model)
 conn = aiosqlite.connect("data/langchain.db",check_same_thread=False)
 checkpointer = AsyncSqliteSaver(conn=conn)
 
@@ -38,6 +41,7 @@ coder = create_react_agent(
             debug=True,
             prompt=CODER_PROMPT,
 )
+
 
 rag_expert = create_react_agent(
             model=model,

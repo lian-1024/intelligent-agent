@@ -1,8 +1,11 @@
 from typing import List, Dict, Any, AsyncGenerator
-from fastapi import APIRouter, Form, UploadFile
+from fastapi import APIRouter, Form, Query, UploadFile, Body
+from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from fastapi.responses import StreamingResponse
 from datetime import datetime
+
+from pydantic import Field
 from src.graphs.supervisor.graph import graph
 
 
@@ -27,20 +30,19 @@ async def build_human_message(user_input: str, file_urls: str = None) -> HumanMe
 
     # file_urls = ["https://picsum.photos/200/300","https://picsum.photos/200/300"]
 
+    if not file_urls or not isinstance(file_urls, str) or not file_urls.strip():
+        return HumanMessage(content=human_message_content)
+
     file_urls = file_urls.split(",")
-    print("file_urls:", file_urls)
 
     if file_urls:
         for file_url in file_urls:
             if not file_url or not isinstance(file_url, str) or not file_url.strip():
                 raise ValueError("图片URL不能为空")
-            
             print("file_url",file_url)
-            
             # 验证URL格式
             if not file_url.startswith(('http://', 'https://')):
                 raise ValueError(f"无效的图片URL格式: {file_url}")
-                
             print("file_url:",file_url)
             # 追加到 消息数组当中
             human_message_content.append(
@@ -98,38 +100,43 @@ async def invoke_langgraph_sync(
     }
 
 
+class ChatRequest(BaseModel):
+    user_input: str = Field(default="你好", description="用户输入字段")
+    file_urls: str = Field(default=None, description="文件url列表")
+    stream: bool = Field(default=None, description="是否需要进行流式返回")
+    session_id: str = Field(default=None, description="会话 ID")
+
+
 @router.post("/completions")
 async def handle_chat_request(
-    user_input: str = Form(default="你好", description="用户输入字段"),
-    file_urls: str = Form(default=None, description="文件url列表"),
-    stream: bool = Form(default=True, description="是否需要进行流式返回"),
-    session_id: str = Form(default=None, description="会话 ID"),
+    req: ChatRequest = Body(...)
 ):
     """
     处理聊天请求，支持文本、图片和流式响应。
 
     参数:
     - user_input: 用户输入的文本或问题。
-    - image_files: 可选的图片文件列表。
+    - file_urls: 可选的文件列表。
     - stream: 如果为 true，返回流式响应；否则返回同步响应。
     - session_id: 可选的会话 ID。
 
     返回:
     - stream=True 时返回 StreamingResponse，stream=False 时返回 JSON 响应。
     """
-
+    print("user_input:", req.user_input)
+    print("file_urls:", req.file_urls)
+    print("stream:", req.stream)
+    print("session_id:", req.session_id)
     try:
-        human_message = await build_human_message(user_input, file_urls)
-
-        if stream:
+        human_message = await build_human_message(req.user_input, req.file_urls)
+        if req.stream:
             print("stream:进行流式获取")
             return StreamingResponse(
-                content=stream_langgraph_response(human_message, session_id),
+                content=stream_langgraph_response(human_message, req.session_id),
                 media_type="text/event-stream",
             )
         else:
-            return await invoke_langgraph_sync(human_message, session_id)
-
+            return await invoke_langgraph_sync(human_message, req.session_id)
     except ValueError as e:
         return {"error": str(e)}
     except Exception as e:
