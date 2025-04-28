@@ -109,7 +109,7 @@ class ChatRequest(BaseModel):
 
 @router.post("/completions")
 async def handle_chat_request(
-    req: ChatRequest = Body(...)
+    req: ChatRequest = Form()
 ):
     """
     处理聊天请求，支持文本、图片和流式响应。

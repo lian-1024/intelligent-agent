@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+
+from uvicorn import config
 from src.api import api_router
-from src.shared.configuration import ServerConfig
+from src.shared.configuration import settings,configuration
 
 import uvicorn
 
@@ -15,9 +17,9 @@ async def lifespan(app: FastAPI):
     print("Shutting down...")
 
 app = FastAPI(
-    title=ServerConfig.name,
-    version=ServerConfig.version,
-    description=ServerConfig.description,
+    title=configuration.NAME,
+    version=configuration.VERSION,
+    description=configuration.DESCRIPTION,
     lifespan=lifespan,
     docs_url="/docs"
 )
@@ -38,8 +40,8 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
         app,
-        host=ServerConfig.host,
-        port=ServerConfig.port,
+        host=configuration.HOST,
+        port=configuration.PORT,
     )
 
 

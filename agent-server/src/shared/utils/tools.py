@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 import requests
 import os
 
-load_dotenv()
+from src.shared.configuration import settings
 
-BOCHA_API_KEY = os.getenv("BOCHA_API_KEY")
+load_dotenv()
 
 
 @tool
@@ -38,7 +38,7 @@ def bocha_websearch_tool(query: str, count: int = 10) -> str:
     
     url = 'https://api.bochaai.com/v1/web-search'
     headers = {
-        'Authorization': f'Bearer {BOCHA_API_KEY}',  # 请替换为你的API密钥
+        'Authorization': f'Bearer {settings.BOCHA_API_KEY}',  # 请替换为你的API密钥
         'Content-Type': 'application/json'
     }
     data = {

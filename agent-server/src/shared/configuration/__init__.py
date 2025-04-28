@@ -1,10 +1,9 @@
-from src.shared.configuration.model_config import ModelConfig
-from src.shared.configuration.server_config import ServerConfig
-
+from src.shared.configuration.configuration import configuration
+from src.shared.configuration.settings import settings
 
 __all__ = [
-    "ModelConfig",
-    "ServerConfig",
+    "configuration",
+    "settings"
 ]
 
 
