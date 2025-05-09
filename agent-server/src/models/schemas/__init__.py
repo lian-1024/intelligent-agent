@@ -1,6 +1,5 @@
-from src.models.schemas.chat import ChatRequestWithImages,ChatRequest
+from src.models.schemas.chat import ChatRequest
 
 __all__ = [
-    "ChatRequestWithImages",
     "ChatRequest"
 ]

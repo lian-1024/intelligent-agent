@@ -1,7 +1,11 @@
 from fastapi.responses import RedirectResponse
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from src.shared.constants.github import GITHUB_AUTH_URL, GITHUB_TOKEN_URL, GITHUB_USER_URL
+from src.shared.constants.github import (
+    GITHUB_AUTH_URL,
+    GITHUB_TOKEN_URL,
+    GITHUB_USER_URL,
+)
 from src.shared.configuration import settings
 
 import httpx
@@ -9,26 +13,31 @@ import httpx
 
 router = APIRouter()
 
+GITHUB_CLIENT_ID: str = "Ov23liX0zIgPyQtkedmy"
+GITHUB_REDIRECT_URI: str = "http://localhost:3000/auth/callback"
 
-@router.get("/github/login")
+@router.get("/github/login", dependencies=[])
 async def github_login():
     """
     重定向到Github授权页面
     """
 
     github_auth_url = (
-        f"{GITHUB_AUTH_URL}?client_id={settings.GITHUB_CLIENT_ID}"
-        f"&redirect_uri={settings.GITHUB_REDIRECT_URI}&scope=user:email"
+        f"{GITHUB_AUTH_URL}?client_id={GITHUB_CLIENT_ID}"
+        f"&redirect_uri={GITHUB_REDIRECT_URI}"
     )
+
 
     return RedirectResponse(github_auth_url)
 
 
-@router.get("/github/callback")
+@router.get("/github/callback",dependencies=[])
 async def auth_callback(code: str):
     """
     Github授权回调
     """
+
+    print("code:",code)
     async with httpx.AsyncClient() as client:
         # 获取access_token
         response = await client.post(
@@ -41,6 +50,9 @@ async def auth_callback(code: str):
             },
             headers={"Accept": "application/json"},
         )
+        print("GITHUB_TOKEN_URL:",GITHUB_TOKEN_URL)
+
+        print('response:',response)
 
         # 如果状态码不为 200 则抛出异常
         if response.status_code != 200:

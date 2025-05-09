@@ -9,5 +9,7 @@ dependencies = [
     "langchain>=0.3.24",
     "langchain-community>=0.3.22",
     "langgraph>=0.3.31",
+    "sqlalchemy>=2.0.40",
+    "sqlmodel>=0.0.24",
     "uvicorn>=0.34.2",
 ]

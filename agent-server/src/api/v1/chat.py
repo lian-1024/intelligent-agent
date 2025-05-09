@@ -1,8 +1,11 @@
-from typing import List, Dict, Any, AsyncGenerator
+from turtle import title
+from typing import Annotated, List, Dict, Any, AsyncGenerator
 from fastapi import APIRouter, Form, Query, UploadFile, Body
+from fastapi.datastructures import FormData
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from fastapi.responses import StreamingResponse
+from src.models.schemas.chat import ChatRequest
 from datetime import datetime
 
 from pydantic import Field
@@ -39,11 +42,11 @@ async def build_human_message(user_input: str, file_urls: str = None) -> HumanMe
         for file_url in file_urls:
             if not file_url or not isinstance(file_url, str) or not file_url.strip():
                 raise ValueError("图片URL不能为空")
-            print("file_url",file_url)
+            print("file_url", file_url)
             # 验证URL格式
-            if not file_url.startswith(('http://', 'https://')):
+            if not file_url.startswith(("http://", "https://")):
                 raise ValueError(f"无效的图片URL格式: {file_url}")
-            print("file_url:",file_url)
+            print("file_url:", file_url)
             # 追加到 消息数组当中
             human_message_content.append(
                 {
@@ -76,7 +79,7 @@ async def stream_langgraph_response(
         ):
             yield f"data: {chunk[0].content}\n\n"
     except Exception as e:
-        yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+        yield f'data: {{"error": "{str(e)}"}}\n\n'
 
 
 async def invoke_langgraph_sync(
@@ -100,16 +103,13 @@ async def invoke_langgraph_sync(
     }
 
 
-class ChatRequest(BaseModel):
-    user_input: str = Field(default="你好", description="用户输入字段")
-    file_urls: str = Field(default=None, description="文件url列表")
-    stream: bool = Field(default=None, description="是否需要进行流式返回")
-    session_id: str = Field(default=None, description="会话 ID")
-
-
-@router.post("/completions")
+@router.post(
+    "/completions",
+    summary="AI问答标准请求接口",
+    response_description="AI回答的内容，如果请求体参数 stream=True那么就是 SSE 流式返回的数据"
+)
 async def handle_chat_request(
-    req: ChatRequest = Form()
+    req: Annotated[ChatRequest, Form(media_type="multipart/form-data")]
 ):
     """
     处理聊天请求，支持文本、图片和流式响应。

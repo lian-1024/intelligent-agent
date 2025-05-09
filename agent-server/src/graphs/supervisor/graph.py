@@ -6,7 +6,6 @@ from src.shared.utils.tools import bocha_websearch_tool,get_time
 from src.graphs.supervisor.prompt import SUPERVISOR_SYSTEM_PROMPT
 import aiosqlite
 from src.shared.configuration.settings import settings
-
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 
@@ -24,12 +23,8 @@ researcher = create_react_agent(
         )
 
 """
-阻塞html解析 
-立即下子啊并执行脚本
-按照在文档中的执行顺序
 
-异步下载脚本，不阻塞html解析
-等到html解析完成后，DOM;
+
 """
 
 
@@ -40,7 +35,6 @@ coder = create_react_agent(
             debug=True,
             prompt=CODER_PROMPT,
 )
-
 
 rag_expert = create_react_agent(
             model=model,

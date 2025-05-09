@@ -1,10 +1,9 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI,Header,HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from uvicorn import config
 from src.api import api_router
-from src.shared.configuration import settings,configuration
+from src.shared.configuration import configuration
 
 import uvicorn
 
@@ -16,12 +15,14 @@ async def lifespan(app: FastAPI):
     # 关闭时的操作
     print("Shutting down...")
 
+
 app = FastAPI(
     title=configuration.NAME,
     version=configuration.VERSION,
     description=configuration.DESCRIPTION,
     lifespan=lifespan,
-    docs_url="/docs"
+    docs_url="/docs",
+    # dependencies=global_dependencies
 )
 
 # 配置 CORS
